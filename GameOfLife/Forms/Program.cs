@@ -31,7 +31,7 @@ namespace GameOfLife {
 
 				switch (mode[1]) { // modes based on whether /c, /p, or /s is passed in
 					case 'c': //Config mode "/c"
-						//Application.Run(new SettingsForm());
+						Application.Run(new SettingsForm());
 						break;
 					case 'p': //Preview mode "/p"
 						if (handle == null) {
@@ -40,7 +40,7 @@ namespace GameOfLife {
 						}
 
 						IntPtr wndHandle = new IntPtr(long.Parse(handle));
-						//Application.Run(new PreviewForm(wndHandle));
+						Application.Run(new ScreensaverForm(wndHandle));
 						break;
 					case 's': //Full-screen mode "/s"
 						ShowScreenSaver();

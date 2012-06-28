@@ -22,8 +22,12 @@ namespace GameOfLife {
 		////////////////////////////////////////Events////////////////////////////////////////////
 
 		private void OnLoad(object sender, EventArgs e) {
-		//	Cursor.Hide();
-		//	this.TopMost = true;
+			if (!previewMode) {
+				Cursor.Hide();
+				this.TopMost = true;
+			}
+			this.ApplyDefaults();
+			this.LoadSettings();
 
 			this.OnBegin();
 			this.Randomize();
@@ -31,6 +35,7 @@ namespace GameOfLife {
 		}
 
 		private void OnMouseMove(object sender, MouseEventArgs e) {
+			if (previewMode) return;
 			if (!lastMouseLoc.IsEmpty) {
 				if (Math.Abs(lastMouseLoc.X - e.X) > SIG_MOUSE_MOVE || Math.Abs(lastMouseLoc.Y - e.Y) > SIG_MOUSE_MOVE) {
 					Application.Exit();
@@ -41,10 +46,12 @@ namespace GameOfLife {
 		}
 
 		private void OnMouseClick(object sender, MouseEventArgs e) {
+			if (previewMode) return;
 			Application.Exit();
 		}
 
 		private void OnKeyDown(object sender, KeyEventArgs e) {
+			if (previewMode) return;
 			switch (e.KeyCode) {
 				case Keys.F5:
 					this.Randomize();
@@ -70,35 +77,70 @@ namespace GameOfLife {
 			}
 		}
 
+		private void LoadSettings() {
+			//TODO
+		}
+
 		/////////////////////////////////////// Logic ////////////////////////////////////////////
 
-		private ulong liveLimit = 1000;
-		private int ticklength = 200;
-		private int cellSize = 6;//12;
-		private BitArray bornBits;
-		private BitArray liveBits;
+		/**** Begin Settings ****/
+
+		public int randomRatio { get; set; }
+		public ulong liveLimit { get; set; }
+		public int ticklength { get; set; }
+		public BitArray bornBits { get; set; }
+		public BitArray liveBits { get; set; }
+		public bool altMode { get; set; }
+
+		public int cellSize { get; set; }
+		public bool enableClock { get; set; } //show clock
+		public bool applyClock { get; set; } //apply the clock to the simulation
+		public int[] clockOffset { get; set; }
+
+		/**** End Settings ****/
 
 		private ulong gametime = 0;
 		private bool[,] nowc, prevc; //cells now and cells in the previous step
 
+		private void ApplyDefaults() {
+			liveLimit = 1000;
+			ticklength = 200;
+			altMode = true;
+			randomRatio = 7;
+			//                                     0,     1,     2,     3,     4,     5,     6,     7,     8,     9
+			bornBits = new BitArray(new bool[] { false, false,  true, false, false, false, false, false, false });
+			liveBits = new BitArray(new bool[] { false,  true,  true, false, false, false, false, false, false });
+
+			cellSize = 6;
+			enableClock = applyClock = true;
+			clockOffset = new int[] { 5, 5 };
+
+			if (previewMode) {
+				liveLimit = 100;
+				enableClock = false;
+				randomRatio = 2;
+			}
+		}
+
 		private void OnBegin() {
 			int x = this.Bounds.Width / cellSize;
 			int y = this.Bounds.Height / cellSize;
-			nowc = new bool[x,y];
-			prevc = new bool[x, y];
+			if (!altMode) { //the correct way to do it
+				nowc = new bool[x, y];
+				prevc = new bool[x, y];
+			} else { //the "alternate way", which still produces interesting results
+				nowc = prevc = new bool[x, y];
+			}
 
 			gameTimer.Interval = ticklength;
 
-			//default                              0,     1,     2,     3,     4,     5,     6,     7,     8,     9
-			bornBits = new BitArray(new bool[] { false, false, false,  true, false, false, false, false, false, false });
-			liveBits = new BitArray(new bool[] { false, false,  true,  true, false, false, false, false, false, false });
 		}
 
 		private void Randomize() {
 			Random r = new Random();
 			for (int x = 0; x < prevc.GetLength(0); x++) {
 				for (int y = 0; y < prevc.GetLength(1); y++) {
-					prevc[x, y] = nowc[x, y] = (r.Next(7) == 1);
+					prevc[x, y] = nowc[x, y] = (r.Next(randomRatio) == 1);
 				}
 			}
 		}
@@ -186,6 +228,14 @@ namespace GameOfLife {
 				}
 			}
 
+			if (enableClock && applyClock) {
+				bool[,] clpat = Clock.GetCurrentTimePattern();
+				int xorg = nowc.GetLength(0) - clockOffset[0] - clpat.GetLength(0);
+				int yorg = nowc.GetLength(1) - clockOffset[1] - clpat.GetLength(1);
+
+				nowc.OverlayPattern(clpat, xorg, yorg);
+			}
+
 			this.Refresh();
 		}
 
@@ -206,50 +256,21 @@ namespace GameOfLife {
 					}
 				}
 			}
-		}
 
-		/////////////////////////////////////////Interesting Patterns//////////////////////////////////////////
+			if (enableClock) {
+				bool[,] clpat = Clock.GetCurrentTimePattern();
 
-	}
-
-	public static class InterestingPatterns {
-		public static bool[,] Acorn {
-			get { /*
-				return new bool[,] { 
-					{ false,  true, false, false, false, false, false },
-					{ false, false, false,  true, false, false, false },
-					{  true,  true, false, false,  true,  true,  true }
-				}; //*/
-				return new bool[,] { 
-					{ false, false,  true },
-					{  true, false,  true },
-					{ false, false, false },
-					{ false,  true, false },
-					{ false, false,  true },
-					{ false, false,  true },
-					{ false, false,  true },
-				};
+				int xorg = nowc.GetLength(0) - clockOffset[0] - clpat.GetLength(0);
+				int yorg = nowc.GetLength(1) - clockOffset[1] - clpat.GetLength(1);
+				for (int x = 0; x < clpat.GetLength(0); x++) {
+					for (int y = 0; y < clpat.GetLength(1); y++) {
+						if (clpat[x, y]) {
+							g.FillRectangle(Brushes.Red, (xorg + x) * cellSize, (yorg + y) * cellSize, cellSize, cellSize);
+						}
+					}
+				}
 			}
 		}
 
-		public static bool[,] Glider {
-			get {
-				return new bool[,] {
-					{  true, false, false },
-					{ false,  true,  true },
-					{  true,  true, false },
-				};
-			}
-		}
-
-		public static bool[,] Blinker {
-			get {
-				return new bool[,] {
-					{ false,  true, false },
-					{ false,  true, false },
-					{ false,  true, false },
-				};
-			}
-		}
 	}
 }
