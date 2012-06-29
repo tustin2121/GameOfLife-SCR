@@ -44,6 +44,28 @@ namespace GameOfLife {
 			}
 		}
 
+		public static bool[,] Bomb {
+			get {
+				return new bool[,] {
+					{ false,  true, false },
+					{  true,  true,  true },
+					{ false,  true, false },
+				};
+			}
+		}
+
+		public static bool[,] Bomb2 {
+			get {
+				return new bool[,] {
+					{ false, false, false, false, false },
+					{ false,  true, false, false, false },
+					{  true,  true,  true, false, false },
+					{ false,  true, false, false, false },
+					{ false, false, false, false, false },
+				};
+			}
+		}
+
 
 		//Extension method
 		public static bool[,] OverlayPattern(this bool[,] b, bool[,] pattern, int offx, int offy){

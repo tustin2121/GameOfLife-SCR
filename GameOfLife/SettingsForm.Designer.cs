@@ -70,6 +70,12 @@
 			this.comboBox2 = new System.Windows.Forms.ComboBox();
 			this.comboBox1 = new System.Windows.Forms.ComboBox();
 			this.label5 = new System.Windows.Forms.Label();
+			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+			this.btnOk = new System.Windows.Forms.Button();
+			this.dayNightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.lifeWithoutDeathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.seedsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.menuStrip1.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numTick)).BeginInit();
@@ -81,6 +87,7 @@
 			this.groupBox5.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.tabPage3.SuspendLayout();
+			this.tableLayoutPanel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// menuStrip1
@@ -97,7 +104,11 @@
 			// 
 			this.presetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.standardToolStripMenuItem,
+            this.toolStripSeparator2,
             this.highLifeToolStripMenuItem,
+            this.dayNightToolStripMenuItem,
+            this.lifeWithoutDeathToolStripMenuItem,
+            this.seedsToolStripMenuItem,
             this.toolStripSeparator1,
             this.mayanMazeToolStripMenuItem});
 			this.presetsToolStripMenuItem.Name = "presetsToolStripMenuItem";
@@ -107,14 +118,16 @@
 			// standardToolStripMenuItem
 			// 
 			this.standardToolStripMenuItem.Name = "standardToolStripMenuItem";
-			this.standardToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
-			this.standardToolStripMenuItem.Text = "Standard Conway\'s Game of Life";
+			this.standardToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+			this.standardToolStripMenuItem.Text = "Standard Game of Life";
+			this.standardToolStripMenuItem.Click += new System.EventHandler(this.standardToolStripMenuItem_Click);
 			// 
 			// highLifeToolStripMenuItem
 			// 
 			this.highLifeToolStripMenuItem.Name = "highLifeToolStripMenuItem";
 			this.highLifeToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
 			this.highLifeToolStripMenuItem.Text = "HighLife";
+			this.highLifeToolStripMenuItem.Click += new System.EventHandler(this.highLifeToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -126,6 +139,7 @@
 			this.mayanMazeToolStripMenuItem.Name = "mayanMazeToolStripMenuItem";
 			this.mayanMazeToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
 			this.mayanMazeToolStripMenuItem.Text = "Mayan Maze";
+			this.mayanMazeToolStripMenuItem.Click += new System.EventHandler(this.mayanMazeToolStripMenuItem_Click);
 			// 
 			// groupBox3
 			// 
@@ -139,7 +153,7 @@
 			this.groupBox3.Controls.Add(this.chkBorn2);
 			this.groupBox3.Controls.Add(this.chkBorn1);
 			this.groupBox3.Controls.Add(this.chkBorn0);
-			this.groupBox3.Location = new System.Drawing.Point(12, 256);
+			this.groupBox3.Location = new System.Drawing.Point(12, 165);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(395, 46);
 			this.groupBox3.TabIndex = 4;
@@ -259,6 +273,11 @@
 			// numTick
 			// 
 			this.numTick.Location = new System.Drawing.Point(342, 11);
+			this.numTick.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
 			this.numTick.Name = "numTick";
 			this.numTick.Size = new System.Drawing.Size(65, 20);
 			this.numTick.TabIndex = 3;
@@ -310,7 +329,7 @@
 			this.groupBox4.Controls.Add(this.chkLive2);
 			this.groupBox4.Controls.Add(this.chkLive1);
 			this.groupBox4.Controls.Add(this.chkLive0);
-			this.groupBox4.Location = new System.Drawing.Point(12, 308);
+			this.groupBox4.Location = new System.Drawing.Point(12, 217);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(395, 46);
 			this.groupBox4.TabIndex = 10;
@@ -422,11 +441,10 @@
 			this.tabControl.Controls.Add(this.tabPage1);
 			this.tabControl.Controls.Add(this.tabPage2);
 			this.tabControl.Controls.Add(this.tabPage3);
-			this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tabControl.Location = new System.Drawing.Point(0, 24);
+			this.tabControl.Location = new System.Drawing.Point(3, 3);
 			this.tabControl.Name = "tabControl";
 			this.tabControl.SelectedIndex = 0;
-			this.tabControl.Size = new System.Drawing.Size(425, 388);
+			this.tabControl.Size = new System.Drawing.Size(419, 351);
 			this.tabControl.TabIndex = 6;
 			// 
 			// tabPage1
@@ -441,7 +459,7 @@
 			this.tabPage1.Location = new System.Drawing.Point(4, 22);
 			this.tabPage1.Name = "tabPage1";
 			this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage1.Size = new System.Drawing.Size(417, 362);
+			this.tabPage1.Size = new System.Drawing.Size(411, 325);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Simulation";
 			this.tabPage1.UseVisualStyleBackColor = true;
@@ -453,7 +471,7 @@
 			this.tabPage2.Location = new System.Drawing.Point(4, 22);
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage2.Size = new System.Drawing.Size(417, 362);
+			this.tabPage2.Size = new System.Drawing.Size(411, 325);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Display";
 			this.tabPage2.UseVisualStyleBackColor = true;
@@ -542,7 +560,7 @@
 			this.tabPage3.Location = new System.Drawing.Point(4, 22);
 			this.tabPage3.Name = "tabPage3";
 			this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage3.Size = new System.Drawing.Size(417, 362);
+			this.tabPage3.Size = new System.Drawing.Size(411, 325);
 			this.tabPage3.TabIndex = 2;
 			this.tabPage3.Text = "Control Keys";
 			this.tabPage3.UseVisualStyleBackColor = true;
@@ -580,17 +598,70 @@
 			this.label5.TabIndex = 0;
 			this.label5.Text = "#1 Key:";
 			// 
+			// tableLayoutPanel1
+			// 
+			this.tableLayoutPanel1.ColumnCount = 1;
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.tableLayoutPanel1.Controls.Add(this.btnOk, 0, 1);
+			this.tableLayoutPanel1.Controls.Add(this.tabControl, 0, 0);
+			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
+			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+			this.tableLayoutPanel1.RowCount = 2;
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(425, 396);
+			this.tableLayoutPanel1.TabIndex = 9;
+			// 
+			// btnOk
+			// 
+			this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnOk.Location = new System.Drawing.Point(347, 363);
+			this.btnOk.Name = "btnOk";
+			this.btnOk.Size = new System.Drawing.Size(75, 30);
+			this.btnOk.TabIndex = 0;
+			this.btnOk.Text = "OK";
+			this.btnOk.UseVisualStyleBackColor = true;
+			this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+			// 
+			// dayNightToolStripMenuItem
+			// 
+			this.dayNightToolStripMenuItem.Name = "dayNightToolStripMenuItem";
+			this.dayNightToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+			this.dayNightToolStripMenuItem.Text = "Day && Night";
+			this.dayNightToolStripMenuItem.Click += new System.EventHandler(this.dayNightToolStripMenuItem_Click);
+			// 
+			// lifeWithoutDeathToolStripMenuItem
+			// 
+			this.lifeWithoutDeathToolStripMenuItem.Name = "lifeWithoutDeathToolStripMenuItem";
+			this.lifeWithoutDeathToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+			this.lifeWithoutDeathToolStripMenuItem.Text = "Life without Death";
+			this.lifeWithoutDeathToolStripMenuItem.Click += new System.EventHandler(this.lifeWithoutDeathToolStripMenuItem_Click);
+			// 
+			// seedsToolStripMenuItem
+			// 
+			this.seedsToolStripMenuItem.Name = "seedsToolStripMenuItem";
+			this.seedsToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+			this.seedsToolStripMenuItem.Text = "Seeds";
+			this.seedsToolStripMenuItem.Click += new System.EventHandler(this.seedsToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(242, 6);
+			// 
 			// SettingsForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(425, 412);
-			this.Controls.Add(this.tabControl);
+			this.ClientSize = new System.Drawing.Size(425, 420);
+			this.Controls.Add(this.tableLayoutPanel1);
 			this.Controls.Add(this.menuStrip1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "SettingsForm";
-			this.Text = "SettingsForm";
+			this.Text = "Conway\'s Game of Life Settings";
+			this.Load += new System.EventHandler(this.SettingsForm_Load);
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
@@ -609,6 +680,7 @@
 			this.groupBox2.PerformLayout();
 			this.tabPage3.ResumeLayout(false);
 			this.tabPage3.PerformLayout();
+			this.tableLayoutPanel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -663,5 +735,11 @@
 		private System.Windows.Forms.ComboBox comboBox1;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.ComboBox comboBox2;
+		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+		private System.Windows.Forms.Button btnOk;
+		private System.Windows.Forms.ToolStripMenuItem dayNightToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem lifeWithoutDeathToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripMenuItem seedsToolStripMenuItem;
 	}
 }

@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Collections;
+using Microsoft.Win32;
+
+using S = GameOfLife.SettingsForm;
 
 namespace GameOfLife {
 	public partial class ScreensaverForm : Form {
@@ -24,7 +27,9 @@ namespace GameOfLife {
 		private void OnLoad(object sender, EventArgs e) {
 			if (!previewMode) {
 				Cursor.Hide();
+#if !DEBUG
 				this.TopMost = true;
+#endif
 			}
 			this.ApplyDefaults();
 			this.LoadSettings();
@@ -51,11 +56,14 @@ namespace GameOfLife {
 		}
 
 		private void OnKeyDown(object sender, KeyEventArgs e) {
+			Random r;
+
+			gametime = 0;
+
 			if (previewMode) return;
 			switch (e.KeyCode) {
 				case Keys.F5:
 					this.Randomize();
-					gametime = 0;
 					break;
 				case Keys.D0:
 					ClearAll();
@@ -66,11 +74,20 @@ namespace GameOfLife {
 					break;
 				case Keys.D2:
 					ClearAll();
-					RandomlyPlacePattern(InterestingPatterns.Glider);
+					r = new Random();
+					for (int i = 0; i < 200; i++)
+						RandomlyPlacePattern(InterestingPatterns.Glider, 1, rand:r);
 					break;
 				case Keys.D3:
 					ClearAll();
-					RandomlyPlacePattern(InterestingPatterns.Blinker);
+					r = new Random();
+					for (int i = 0; i < 50; i++)
+						RandomlyPlacePattern(InterestingPatterns.Bomb2, rand:r);
+					break;
+				case Keys.D4:
+					ClearAll();
+					bool[,] p = PatternLoader.LoadPatternFromBMP(ImageResource.breeder);
+					LeftPlacePattern(p);
 					break;
 				default:
 					Application.Exit(); return;
@@ -78,7 +95,24 @@ namespace GameOfLife {
 		}
 
 		private void LoadSettings() {
-			//TODO
+			// Get the value stored in the Registry
+			RegistryKey key = Registry.CurrentUser.OpenSubKey(S.REG_SETTING_KEY);
+			if (key == null) return;
+
+			///// Sim Settings /////
+			liveLimit = (ulong) S.RegKeyOrDefault(key, S.KEY_SIMLIM, (int)liveLimit);
+			ticklength = S.RegKeyOrDefault(key, S.KEY_TICKLEN, ticklength);
+			altMode = S.RegKeyOrDefault(key, S.KEY_ALTMODE, altMode);
+
+			int u = S.RegKeyOrDefault(key, S.KEY_BORNLIVE_BITS, 0x10003000);
+			bornBits = new BitArray(new int[] { (int)(u & 0xffff0000) >> 16 });
+			liveBits = new BitArray(new int[] { (int)(u & 0x0000ffff) });
+
+			///// Display Settings /////
+			cellSize = S.RegKeyOrDefault(key, S.KEY_CELLSIZE, 6);
+
+			enableClock = S.RegKeyOrDefault(key, S.KEY_CLOCKEN, true);
+			applyClock = S.RegKeyOrDefault(key, S.KEY_CLOCKAP, true);
 		}
 
 		/////////////////////////////////////// Logic ////////////////////////////////////////////
@@ -104,14 +138,15 @@ namespace GameOfLife {
 
 		private void ApplyDefaults() {
 			liveLimit = 1000;
-			ticklength = 200;
-			altMode = true;
+			ticklength = 60;
+			altMode = false;
 			randomRatio = 7;
-			//                                     0,     1,     2,     3,     4,     5,     6,     7,     8,     9
-			bornBits = new BitArray(new bool[] { false, false,  true, false, false, false, false, false, false });
-			liveBits = new BitArray(new bool[] { false,  true,  true, false, false, false, false, false, false });
+			//                                      0,     1,     2,     3,     4,     5,     6,     7,     8,     9
+			bornBits =	new BitArray(new bool[] { false, false, false,  true, false, false, false, false, false, false });
+			liveBits =	//new BitArray(new bool[] { true, true, true, true, true, true, true, true, true, true });
+						new BitArray(new bool[] { false, false,  true,  true, false, false, false, false, false, false });
 
-			cellSize = 6;
+			cellSize = 10;
 			enableClock = applyClock = true;
 			clockOffset = new int[] { 5, 5 };
 
@@ -159,22 +194,49 @@ namespace GameOfLife {
 
 			for (int x = 0; x < pattern.GetLength(0); x++) {
 				for (int y = 0; y < pattern.GetLength(1); y++) {
+					if (destx + x >= prevc.GetLength(0) || destx + x < 0) continue;
+					if (desty + y >= prevc.GetLength(1) || desty + y < 0) continue;
+
 					prevc[destx + x, desty + y] = nowc[destx + x, desty + y] = pattern[x, y];
 				}
 			}
 		}
 
-		private void RandomlyPlacePattern(bool[,] pattern) {
-			Random r = new Random();
-
-			int divx = (prevc.GetLength(0) - pattern.GetLength(0)) / 4;
-			int divy = (prevc.GetLength(1) - pattern.GetLength(1)) / 4;
-
-			int destx = (r.Next(divx) + r.Next(divx) + r.Next(divx) + r.Next(divx)) - (pattern.GetLength(0) / 2);
-			int desty = (r.Next(divy) + r.Next(divy) + r.Next(divy) + r.Next(divy)) - (pattern.GetLength(1) / 2);
+		private void LeftPlacePattern(bool[,] pattern) {
+			int destx = 0;
+			int desty = (prevc.GetLength(1) / 2) - (pattern.GetLength(1) / 2);
 
 			for (int x = 0; x < pattern.GetLength(0); x++) {
 				for (int y = 0; y < pattern.GetLength(1); y++) {
+					if (destx + x >= prevc.GetLength(0) || destx + x < 0) continue;
+					if (desty + y >= prevc.GetLength(1) || desty + y < 0) continue;
+
+					prevc[destx + x, desty + y] = nowc[destx + x, desty + y] = pattern[x, y];
+				}
+			}
+		}
+
+		private void RandomlyPlacePattern(bool[,] pattern, int numDice = 4, Random rand = null) {
+			if (rand == null) rand = new Random();
+			if (numDice < 1) numDice = 1;
+
+			int divx = (prevc.GetLength(0) - pattern.GetLength(0)) / numDice;
+			int divy = (prevc.GetLength(1) - pattern.GetLength(1)) / numDice;
+
+			int rx = 0, ry = 0;
+			for (int i = 0; i < numDice; i++) {
+				rx += rand.Next(divx);
+				ry += rand.Next(divy);
+			}
+
+			int destx = rx - (pattern.GetLength(0) / 2);
+			int desty = ry - (pattern.GetLength(1) / 2);
+
+			for (int x = 0; x < pattern.GetLength(0); x++) {
+				for (int y = 0; y < pattern.GetLength(1); y++) {
+					if (destx + x >= prevc.GetLength(0) || destx + x < 0) continue;
+					if (desty + y >= prevc.GetLength(1) || desty + y < 0) continue;
+
 					prevc[destx + x, desty + y] = nowc[destx + x, desty + y] = pattern[x, y];
 				}
 			}
@@ -236,7 +298,8 @@ namespace GameOfLife {
 				nowc.OverlayPattern(clpat, xorg, yorg);
 			}
 
-			this.Refresh();
+			this.Invalidate();
+//			this.Refresh();
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs e) {

@@ -44,7 +44,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -61,29 +61,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\Clock.cs" />
-    <Compile Include="Forms\InterestingPatterns.cs" />
-    <Compile Include="Forms\PreviewForm.cs">
+    <Compile Include="Clock.cs" />
+    <Compile Include="ImageResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ImageResource.resx</DependentUpon>
+    </Compile>
+    <Compile Include="InterestingPatterns.cs" />
+    <Compile Include="PatternLoader.cs" />
+    <Compile Include="PreviewForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ScreensaverForm.cs">
+    <Compile Include="ScreensaverForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ScreensaverForm.Designer.cs">
+    <Compile Include="ScreensaverForm.Designer.cs">
       <DependentUpon>ScreensaverForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Program.cs" />
-    <Compile Include="Forms\SettingsForm.cs">
+    <Compile Include="Program.cs" />
+    <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\SettingsForm.Designer.cs">
+    <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Forms\ScreensaverForm.resx">
+    <EmbeddedResource Include="ImageResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ImageResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ScreensaverForm.resx">
       <DependentUpon>ScreensaverForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SettingsForm.resx">
+    <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -126,6 +136,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Breeder.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\breeder.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

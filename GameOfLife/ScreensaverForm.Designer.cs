@@ -29,7 +29,7 @@
 			// 
 			// gameTimer
 			// 
-			this.gameTimer.Interval = 200;
+			this.gameTimer.Interval = 1;
 			this.gameTimer.Tick += new System.EventHandler(this.OnTick);
 			// 
 			// ScreensaverForm
