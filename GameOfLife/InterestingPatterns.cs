@@ -47,9 +47,9 @@ namespace GameOfLife {
 		public static bool[,] Bomb {
 			get {
 				return new bool[,] {
-					{ false,  true, false },
-					{  true,  true,  true },
-					{ false,  true, false },
+					{ false,  true,  true,  true, false },
+					{  true, false, false, false,  true },
+					{ false,  true,  true,  true, false },
 				};
 			}
 		}

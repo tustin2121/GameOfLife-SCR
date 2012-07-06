@@ -56,12 +56,11 @@ namespace GameOfLife {
 		}
 
 		private void OnKeyDown(object sender, KeyEventArgs e) {
-			Random r;
-
-			gametime = 0;
-
 			if (previewMode) return;
+
+			Random r;
 			switch (e.KeyCode) {
+				///////// keys for new games ////////
 				case Keys.F5:
 					this.Randomize();
 					break;
@@ -82,13 +81,43 @@ namespace GameOfLife {
 					ClearAll();
 					r = new Random();
 					for (int i = 0; i < 50; i++)
-						RandomlyPlacePattern(InterestingPatterns.Bomb2, rand:r);
+						RandomlyPlacePattern(InterestingPatterns.Bomb, rand:r);
 					break;
 				case Keys.D4:
 					ClearAll();
 					bool[,] p = PatternLoader.LoadPatternFromBMP(ImageResource.breeder);
 					LeftPlacePattern(p);
 					break;
+				case Keys.D5:
+				case Keys.D6:
+				case Keys.D7:
+				case Keys.D8:
+				case Keys.D9:
+					break; //These keys will do something in the future!
+				//////// Control Keys ////////
+				case Keys.MediaPlayPause: //pause/resume playback
+				case Keys.F9:
+					if (gameTimer.Enabled)
+						gameTimer.Stop();
+					else
+						gameTimer.Start();
+					break;
+				case Keys.MediaNextTrack: //next frame, if possible
+				case Keys.F11:
+					if (gameTimer.Enabled) gameTimer.Stop();
+					StepForward();
+					this.Invalidate();
+					break;
+				case Keys.MediaPreviousTrack: //previous frame, if possible
+				case Keys.F10:
+					if (gameTimer.Enabled) gameTimer.Stop();
+					StepBackwards();
+					this.Invalidate();
+					break;
+				case Keys.MediaStop: //pauses the playback, just to give it something logical to do
+					if (gameTimer.Enabled) gameTimer.Stop();
+					break; 
+				//////// Default Case: Exit /////////
 				default:
 					Application.Exit(); return;
 			}
@@ -118,6 +147,7 @@ namespace GameOfLife {
 		/////////////////////////////////////// Logic ////////////////////////////////////////////
 
 		/**** Begin Settings ****/
+		public int historyLimit { get; set; }
 
 		public int randomRatio { get; set; }
 		public ulong liveLimit { get; set; }
@@ -134,9 +164,14 @@ namespace GameOfLife {
 		/**** End Settings ****/
 
 		private ulong gametime = 0;
-		private bool[,] nowc, prevc; //cells now and cells in the previous step
+
+		private int ARRAYX, ARRAYY;
+		private int oldestframe, currframe; //indexes into the cells array, for current frame, and oldest frame
+		private bool[][,] cells; //the cells and a history of them
+		private bool[,] nowc, prevc; //pointers into the cells array, cells now and cells in the previous step
 
 		private void ApplyDefaults() {
+			historyLimit = 31;
 			liveLimit = 1000;
 			ticklength = 60;
 			altMode = false;
@@ -158,21 +193,78 @@ namespace GameOfLife {
 		}
 
 		private void OnBegin() {
-			int x = this.Bounds.Width / cellSize;
-			int y = this.Bounds.Height / cellSize;
+			ARRAYX = this.Bounds.Width / cellSize;
+			ARRAYY = this.Bounds.Height / cellSize;
+
+			oldestframe = currframe = 0;
+			cells = new bool[historyLimit][,];
+			/*
+			for (int i = 0; i < cells.GetLength(0); i++) {
+				cells[i] = new bool[ARRAYX, ARRAYY];
+			}
+			nowc = prevc = cells[0]; 
+			/*/
+			nowc = prevc = new bool[ARRAYX, ARRAYY];
+			cells[0] = nowc;
+			//*/
+			
+			/*
 			if (!altMode) { //the correct way to do it
 				nowc = new bool[x, y];
 				prevc = new bool[x, y];
 			} else { //the "alternate way", which still produces interesting results
 				nowc = prevc = new bool[x, y];
-			}
+			}*/
 
 			gameTimer.Interval = ticklength;
 
 		}
 
+		private bool StepForward(bool create = false) {
+			//returns false if can't step forward
+			
+			int newframe = (currframe + 1) % historyLimit; //newframe wraps around the cells array
+
+			//if we don't want to step forward in the simulation, return false when it hits the end
+			if (!create && newframe == oldestframe) return false;
+			//*
+			if (cells[newframe] == null) {
+				if (!create) return false;
+
+				cells[newframe] = new bool[ARRAYX, ARRAYY];
+			} //*/
+
+			//destruction begins here
+			prevc = nowc; //switch cell arrays around
+			nowc = cells[newframe];
+			if (altMode) prevc = nowc;
+			if (oldestframe == newframe) oldestframe = (oldestframe + 1) % historyLimit; //erase oldest frame
+			currframe = newframe;
+
+			return true;
+		}
+		private bool StepBackwards() {
+			int newframe = currframe - 1; //note, % doesn't work as expected in reverse
+			if (newframe < 0) newframe += historyLimit; //newframe wraps around the cells array
+
+			if (newframe == oldestframe) return false; //can't step into oldest frame, as we need somewhere for prevc to point to
+
+			//never should the previous cell frames be null. throw error if we're stepping into one though, sanity check
+			if (cells[newframe] == null) throw new Exception("Null Cell Frames!");
+			
+			//destruction begins here
+			int newprevframe = newframe - 1;
+			if (newprevframe < 0) newprevframe += historyLimit;
+			nowc = prevc;
+			prevc = cells[newprevframe];
+			if (altMode) prevc = nowc;
+			currframe = newframe;
+			return true;
+		}
+
 		private void Randomize() {
 			Random r = new Random();
+			gametime = 0;
 			for (int x = 0; x < prevc.GetLength(0); x++) {
 				for (int y = 0; y < prevc.GetLength(1); y++) {
 					prevc[x, y] = nowc[x, y] = (r.Next(randomRatio) == 1);
@@ -181,6 +273,7 @@ namespace GameOfLife {
 		}
 
 		private void ClearAll() {
+			gametime = 0;
 			for (int x = 0; x < prevc.GetLength(0); x++) {
 				for (int y = 0; y < prevc.GetLength(1); y++) {
 					prevc[x, y] = nowc[x, y] = false;
@@ -252,9 +345,10 @@ namespace GameOfLife {
 	//		this.Refresh(); return;
 
 			//switch the arrays, so the now step is in the previous step
-			var tempc = prevc;
+			/*var tempc = prevc;
 			prevc = nowc;
-			nowc = tempc;
+			nowc = tempc;*/
+			StepForward(true);
 
 			int count;
 			int xmin, xmax, ymin, ymax;
